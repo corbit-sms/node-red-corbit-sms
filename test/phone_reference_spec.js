@@ -33,6 +33,7 @@ const ACCEPTED = [
 	['0501234567\u200b', SA], // zero-width space is removed
 	['\u061c0501234567', SA], // Arabic letter mark is removed
 	['+44 020 7946 0958', '4402079460958'], // a trunk 0 without brackets after another code is kept on purpose
+	['+971 50 (123) 4567', '971501234567'], // a balanced bracket in the middle is allowed
 ];
 
 const REFUSED = [
@@ -58,6 +59,9 @@ const REFUSED = [
 	'+971501234567 1)', // a bracket without its pair
 	'((+966) 50 123 4567', // brackets that do not pair up
 	'+966 (50 123 4567', // brackets that do not pair up
+	'+971501234567 ((1))', // nested brackets: the second rule gave 9715012345671
+	'(+971501234567 (1))', // nested brackets
+	'+971501234567 (1)(2)', // bracket at the end
 	'abc',
 	'',
 	null,
@@ -125,7 +129,7 @@ describe('phone reference: bulk send', () => {
 
 describe('phone reference: rule 3 correction in lists', () => {
 	it('refuses list pieces with a dashed or unpaired bracket at the end, never joins them', () => {
-		for (const piece of ['+971 4 123 4567 (1-01)', '+971501234567 (1)-', '+971501234567 (1) -', '+971501234567 (1', '+971501234567 1)']) {
+		for (const piece of ['+971 4 123 4567 (1-01)', '+971501234567 (1)-', '+971501234567 (1) -', '+971501234567 (1', '+971501234567 1)', '+971501234567 ((1))', '(+971501234567 (1))']) {
 			const numbers = corbit.splitNumbers(piece + ', 0501234567').map((t) => corbit.normalizeNumber(t));
 			assert.ok(numbers.includes(undefined), piece);
 			assert.ok(!numbers.includes('97141234567101') && !numbers.includes('9715012345671'), piece);

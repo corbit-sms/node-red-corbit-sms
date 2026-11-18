@@ -25,17 +25,19 @@ class CorbitError extends Error {
 // Removing them never changes a number.
 const PHONE_MARKS = /[\u061c\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff]/g;
 
-/** Every ")" closes an earlier "(" and none is left open. */
-function bracketsPaired(text) {
-	let depth = 0;
+/** Balanced brackets, never nested, and no ")" closing the number (only spaces or hyphens after it). */
+function bracketsOk(text) {
+	let open = false;
 	for (const c of text) {
-		if (c === '(') depth += 1;
-		if (c === ')') {
-			depth -= 1;
-			if (depth < 0) return false;
+		if (c === '(') {
+			if (open) return false;
+			open = true;
+		} else if (c === ')') {
+			if (!open) return false;
+			open = false;
 		}
 	}
-	return depth === 0;
+	return !open && !/\)[\s-]*$/.test(text);
 }
 
 /**
@@ -64,9 +66,10 @@ function normalizeNumber(raw) {
 	// Only digits, spaces, "-", brackets and one leading "+" (an opening bracket may come before it).
 	// Checked on the text as written, before anything is removed: a dot is never a separator.
 	if (!/^[\s(]*\+?[\d\s\-()]+$/.test(text)) return undefined;
-	// A bracket group at the end is a note or an extension ("+971501234567 (1)", "(1-01)", "(1) -"), and the
-	// brackets must pair up ("+971501234567 (1", "... 1)"): dropping them would give 9715012345671, someone else.
-	if (/\([\d\s-]*\)[\s-]*$/.test(text) || !bracketsPaired(text)) return undefined;
+	// A ")" closing the number is a note or an extension ("+971501234567 (1)", "(1-01)", "(1) -"), and brackets
+	// must pair up without nesting ("(1", "1)", "((1))"): dropping them would give 9715012345671, someone else.
+	// Balanced brackets at the start or in the middle are formatting: "(+966) 50 ...", "+1 (202) 555-0123".
+	if (!bracketsOk(text)) return undefined;
 	let digits = text.replace(/\D/g, '');
 	if (/^[\s(]*\+/.test(text)) {
 		// Already international.
