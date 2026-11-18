@@ -20,12 +20,18 @@ class CorbitError extends Error {
 	}
 }
 
+// Invisible marks that come with numbers copied on Android, iOS and Arabic pages: Arabic letter
+// mark, zero-width characters, direction marks, embeddings, overrides and isolates, word joiner, BOM.
+// Removing them never changes a number.
+const PHONE_MARKS = /[\u061c\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff]/g;
+
 /**
  * Turns a phone number into the digits-only international format the API expects.
- * Accepts "+966 50 123 4567", "00966501234567", "966501234567", "+966 (0)50 123 4567",
- * Arabic-Indic digits, and the Saudi local forms "0501234567" and "501234567".
+ * Accepts "+966 50 123 4567", "(+966) 50 123 4567", "00966501234567", "966501234567",
+ * "+966 (0)50 123 4567", Arabic-Indic digits, and the Saudi local forms "0501234567" and "501234567".
  * Anything that could turn into a wrong number is rejected instead of guessed:
- * local numbers of other countries, decimals, "9.66501E+11", "ext 12".
+ * local numbers of other countries, decimals, "9.66501E+11", "ext 12",
+ * a bracket note at the end ("+971501234567 (1)").
  * Returns undefined when the number cannot be used.
  */
 function normalizeNumber(raw) {
@@ -35,15 +41,20 @@ function normalizeNumber(raw) {
 		text = String(raw);
 	} else if (typeof raw === 'string') {
 		text = raw
+			.replace(PHONE_MARKS, '')
 			.trim()
 			.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
 			.replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0));
 	} else {
 		return undefined;
 	}
-	if (!/^\+?[\d\s\-()]+$/.test(text)) return undefined;
+	// Only digits, spaces, "-", brackets and one leading "+" (an opening bracket may come before it).
+	// Checked on the text as written, before anything is removed: a dot is never a separator.
+	if (!/^[\s(]*\+?[\d\s\-()]+$/.test(text)) return undefined;
+	// A bracket group at the end is a note or an extension: "+971501234567 (1)" must not become 9715012345671.
+	if (/\(\s*\d*\s*\)\s*$/.test(text)) return undefined;
 	let digits = text.replace(/\D/g, '');
-	if (text.startsWith('+')) {
+	if (/^[\s(]*\+/.test(text)) {
 		// Already international.
 	} else if (digits.startsWith('00')) {
 		digits = digits.slice(2);
@@ -79,7 +90,7 @@ function splitNumbers(value) {
 	if (typeof value === 'number') return [value];
 	const tokens = [];
 	for (const piece of String(value).split(LIST_SEPARATORS)) {
-		const p = piece.trim();
+		const p = piece.replace(PHONE_MARKS, '').trim();
 		if (p === '') continue;
 		if (SPACED_NUMBER.test(p)) {
 			const joined = p.replace(/\s+/g, '');
