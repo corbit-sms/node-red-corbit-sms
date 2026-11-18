@@ -51,6 +51,13 @@ const REFUSED = [
 	'+971501234567 (1)', // bracket at the end: dropping it gives 9715012345671, someone else
 	'+971 4 123 4567 (101)', // extension in brackets at the end
 	'0501234567 (1)', // bracket at the end
+	'+971 4 123 4567 (1-01)', // bracket at the end with a dash: the first rule gave 97141234567101
+	'+971501234567 (1)-', // a dash after the last bracket
+	'+971501234567 (1) -', // a space and a dash after the last bracket
+	'+971501234567 (1', // a bracket without its pair
+	'+971501234567 1)', // a bracket without its pair
+	'((+966) 50 123 4567', // brackets that do not pair up
+	'+966 (50 123 4567', // brackets that do not pair up
 	'abc',
 	'',
 	null,
@@ -113,5 +120,15 @@ describe('phone reference: bulk send', () => {
 	it('a list with "+971501234567 (1)" sends nothing', async () => {
 		await assert.rejects(corbit.sendBulkSms(conn, { sender: 'A', numbers: '+971501234567 (1), 0501234567', message: 'hi' }), /Invalid mobile numbers/);
 		assert.equal(api.requests.length, 0);
+	});
+});
+
+describe('phone reference: rule 3 correction in lists', () => {
+	it('refuses list pieces with a dashed or unpaired bracket at the end, never joins them', () => {
+		for (const piece of ['+971 4 123 4567 (1-01)', '+971501234567 (1)-', '+971501234567 (1) -', '+971501234567 (1', '+971501234567 1)']) {
+			const numbers = corbit.splitNumbers(piece + ', 0501234567').map((t) => corbit.normalizeNumber(t));
+			assert.ok(numbers.includes(undefined), piece);
+			assert.ok(!numbers.includes('97141234567101') && !numbers.includes('9715012345671'), piece);
+		}
 	});
 });

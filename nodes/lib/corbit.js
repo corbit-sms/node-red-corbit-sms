@@ -25,6 +25,19 @@ class CorbitError extends Error {
 // Removing them never changes a number.
 const PHONE_MARKS = /[\u061c\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff]/g;
 
+/** Every ")" closes an earlier "(" and none is left open. */
+function bracketsPaired(text) {
+	let depth = 0;
+	for (const c of text) {
+		if (c === '(') depth += 1;
+		if (c === ')') {
+			depth -= 1;
+			if (depth < 0) return false;
+		}
+	}
+	return depth === 0;
+}
+
 /**
  * Turns a phone number into the digits-only international format the API expects.
  * Accepts "+966 50 123 4567", "(+966) 50 123 4567", "00966501234567", "966501234567",
@@ -51,8 +64,9 @@ function normalizeNumber(raw) {
 	// Only digits, spaces, "-", brackets and one leading "+" (an opening bracket may come before it).
 	// Checked on the text as written, before anything is removed: a dot is never a separator.
 	if (!/^[\s(]*\+?[\d\s\-()]+$/.test(text)) return undefined;
-	// A bracket group at the end is a note or an extension: "+971501234567 (1)" must not become 9715012345671.
-	if (/\(\s*\d*\s*\)\s*$/.test(text)) return undefined;
+	// A bracket group at the end is a note or an extension ("+971501234567 (1)", "(1-01)", "(1) -"), and the
+	// brackets must pair up ("+971501234567 (1", "... 1)"): dropping them would give 9715012345671, someone else.
+	if (/\([\d\s-]*\)[\s-]*$/.test(text) || !bracketsPaired(text)) return undefined;
 	let digits = text.replace(/\D/g, '');
 	if (/^[\s(]*\+/.test(text)) {
 		// Already international.
