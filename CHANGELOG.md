@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5 (2026-11-20)
+
+- A number copied from iPhone Contacts is accepted again. iOS wraps it in two hidden direction marks (U+202D and U+202C); the previous version refused U+202D. Only U+202E, which shows the digits in reverse order, is still refused.
+
 ## 1.0.4 (2026-11-20)
 
 - Hidden direction marks that come with numbers copied on Android, iOS or from Arabic text (such as U+200F and U+061C) are removed before a number is checked, so a correct number is no longer refused because of them. The two direction overrides (U+202D and U+202E) are refused instead, because they show the digits in a different order from the number that would be sent.

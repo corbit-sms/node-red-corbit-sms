@@ -26,7 +26,9 @@ describe('phone limits (review 2026-11-20)', function () {
 
 	it('direction overrides are refused, other direction marks are removed', function () {
 		assert.equal(N('\u202e7654321050'), undefined);
-		assert.equal(N('\u202d0501234567'), undefined);
+		assert.equal(N('\u202d0501234567\u202c'), SA); // as iOS copies from Contacts
+		assert.equal(N('\u202d+966 50 123 4567\u202c'), SA);
+		assert.deepEqual(corbit.splitNumbers('\u202d+966 50 123 4567\u202c, 0509876543').map(N), [SA, '966509876543']);
 		assert.equal(N('0501234567\u202e'), undefined);
 		assert.equal(N('\u202a0501234567\u202c'), SA);
 		assert.equal(N('\u202b0501234567\u202c'), SA);

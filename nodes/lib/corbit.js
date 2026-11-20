@@ -21,12 +21,13 @@ class CorbitError extends Error {
 }
 
 // Invisible marks that come with numbers copied on Android, iOS and Arabic pages: Arabic letter
-// mark, zero-width characters, direction marks, embeddings and isolates, word joiner, BOM.
+// mark, zero-width characters, direction marks, embeddings, the left-to-right override (iOS wraps a
+// number copied from Contacts in U+202D \u2026 U+202C) and isolates, word joiner, BOM.
 // Removing them never changes a number.
-const PHONE_MARKS = /[\u061c\u200b-\u200f\u202a-\u202c\u2060-\u2064\u2066-\u2069\ufeff]/g;
-// Direction overrides (U+202D, U+202E) reverse how the digits are shown, so the number on the
+const PHONE_MARKS = /[\u061c\u200b-\u200f\u202a-\u202d\u2060-\u2064\u2066-\u2069\ufeff]/g;
+// The right-to-left override (U+202E) reverses how the digits are shown, so the number on the
 // screen is not the number that would be sent: such a number is refused, not cleaned.
-const DIRECTION_OVERRIDES = /[\u202d\u202e]/;
+const DIRECTION_OVERRIDES = /\u202e/;
 // A number is at most 40 characters once the invisible marks are removed, and 200 with them.
 const MAX_NUMBER_LENGTH = 40;
 const MAX_RAW_NUMBER_LENGTH = 200;
