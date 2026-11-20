@@ -25,12 +25,12 @@ describe('phone limits (review 2026-11-20)', function () {
 	});
 
 	it('direction overrides are refused, other direction marks are removed', function () {
-		assert.equal(N('‮7654321050'), undefined);
-		assert.equal(N('‭0501234567'), undefined);
-		assert.equal(N('0501234567‮'), undefined);
-		assert.equal(N('‪0501234567‬'), SA);
-		assert.equal(N('‫0501234567‬'), SA);
-		assert.deepEqual(corbit.splitNumbers('‮7654321050').map(N), [undefined]);
+		assert.equal(N('\u202e7654321050'), undefined);
+		assert.equal(N('\u202d0501234567'), undefined);
+		assert.equal(N('0501234567\u202e'), undefined);
+		assert.equal(N('\u202a0501234567\u202c'), SA);
+		assert.equal(N('\u202b0501234567\u202c'), SA);
+		assert.deepEqual(corbit.splitNumbers('\u202e7654321050').map(N), [undefined]);
 	});
 
 	it('a number is at most 40 characters once the marks are removed, and 200 with them', function () {
@@ -38,10 +38,10 @@ describe('phone limits (review 2026-11-20)', function () {
 		assert.equal(exactly40.length, 40);
 		assert.equal(N(exactly40), SA);
 		assert.equal(N('+966-' + '-'.repeat(27) + '501234567'), undefined);
-		const marked = '0501234567' + '​'.repeat(190);
+		const marked = '0501234567' + '\u200b'.repeat(190);
 		assert.equal(marked.length, 200);
 		assert.equal(N(marked), SA);
-		assert.equal(N(marked + '​'), undefined);
+		assert.equal(N(marked + '\u200b'), undefined);
 	});
 
 	it('long input is refused quickly (no slow regex)', function () {
