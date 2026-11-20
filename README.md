@@ -65,7 +65,7 @@ The result is written to `msg.payload`; the other message properties are kept.
 | Get balance | `{ balance }` |
 | Get sender names | Array of `{ name, status, ... }` |
 
-**Phone numbers.** Spaces, dashes, brackets, a leading `+` or `00` are removed, and Arabic digits are accepted. Saudi local numbers (`05XXXXXXXX`) become `9665XXXXXXXX`. Anything that could turn into a wrong number is rejected and nothing is sent: local numbers of other countries (starting with `0`; write them in international format), decimals such as `9.66501E+11` from a spreadsheet, and extra text such as `ext 12`.
+**Phone numbers.** Spaces, dashes, brackets, a leading `+` or `00` are removed, and Arabic digits are accepted. Saudi local numbers (`05XXXXXXXX`) become `9665XXXXXXXX`. Anything that could turn into a wrong number is rejected and nothing is sent: local numbers of other countries (starting with `0`; write them in international format), decimals such as `9.66501E+11` from a spreadsheet, and extra text such as `ext 12`. Hidden direction marks that come with copied numbers are removed. A note in brackets at the end, such as `+971501234567 (1)`, nested or unpaired brackets, and a bracket at the start around more than a country code are rejected, because removing the brackets would give someone else's number. Brackets used for formatting still work: `(+966) 50 123 4567`, `+1 (202) 555-0123`. A number may be at most 40 characters.
 
 **Sender name.** Click **Load my sender names** to pick one of your approved names, or type it.
 

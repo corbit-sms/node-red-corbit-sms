@@ -107,6 +107,14 @@ describe('lib: API calls', () => {
 		);
 	});
 
+	it('a network failure during a send says the SMS may have been sent', async () => {
+		const reset = Object.assign(new TypeError('fetch failed'), { cause: { code: 'ECONNRESET' } });
+		await assert.rejects(
+			corbit.sendSms({ token: 't', baseUrl: 'https://api.corbit.sa', fetchImpl: async () => { throw reset; } }, { sender: 'OT.SA', to: '0501234567', message: 'hi' }),
+			(e) => /ECONNRESET.*may have been sent/.test(e.message) && /before you send again/.test(e.hint),
+		);
+	});
+
 	it('gets status, report, balance', async () => {
 		api.reply(
 			ok({ status: 'Success', data: { status: 'delivered' } }),
