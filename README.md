@@ -109,7 +109,7 @@ Import them from **Menu → Import → Examples → @corbit2/node-red-corbit-sms
 ## Links
 
 - [Corbit SMS API documentation](https://api.corbit.sa/doc)
-- [Report a problem](https://github.com/agamalsa/node-red-corbit-sms/issues)
+- [Report a problem](https://github.com/corbit-sms/node-red-corbit-sms/issues)
 
 ## License
 

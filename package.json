@@ -7,13 +7,13 @@
     "name": "Ahmed Gamal",
     "email": "a.gamal@corbit.sa"
   },
-  "homepage": "https://github.com/agamalsa/node-red-corbit-sms#readme",
+  "homepage": "https://github.com/corbit-sms/node-red-corbit-sms#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/agamalsa/node-red-corbit-sms.git"
+    "url": "git+https://github.com/corbit-sms/node-red-corbit-sms.git"
   },
   "bugs": {
-    "url": "https://github.com/agamalsa/node-red-corbit-sms/issues"
+    "url": "https://github.com/corbit-sms/node-red-corbit-sms/issues"
   },
   "keywords": [
     "node-red",
